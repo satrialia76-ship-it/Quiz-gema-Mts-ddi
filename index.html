@@ -1,0 +1,454 @@
+```html
+<!DOCTYPE html>
+<html lang="id" class="dark h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Cyber Quiz Lab • Interactive Tech Knowledge Arcade</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Canvas Confetti Library CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+            orbitron: ['Orbitron', 'sans-serif'],
+          },
+          colors: {
+            matrix: {
+              bg: '#040914',
+              card: '#0a1128',
+              cyan: '#00f0ff',
+              neon: '#00ff66',
+              pink: '#ff007f',
+              gold: '#ffd700',
+              purple: '#8a2be2'
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'cyber-float': 'cyberFloat 4s ease-in-out infinite',
+            'radar-spin': 'radarSpin 10s linear infinite',
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.1)' },
+              '50%': { boxShadow: '0 0 35px rgba(255, 0, 127, 0.6), inset 0 0 20px rgba(255, 0, 127, 0.2)' }
+            },
+            cyberFloat: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            radarSpin: {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #030712;
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(0, 240, 255, 0.15) 0px, transparent 45%),
+        radial-gradient(at 90% 90%, rgba(255, 0, 127, 0.15) 0px, transparent 45%),
+        radial-gradient(at 50% 50%, rgba(0, 255, 102, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .cyber-grid {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    .glass-card {
+      background: rgba(10, 17, 40, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+    }
+
+    /* Scrollbar Design */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(4, 9, 20, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.4);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 0, 127, 0.6);
+    }
+  </style>
+</head>
+
+<body class="cyber-grid text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-cyan-400 selection:text-slate-950">
+
+  <header class="border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-lg sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-indigo-500 to-pink-500 p-0.5 animate-pulse-glow">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-orbitron font-bold text-cyan-400 text-sm tracking-widest">
+            AI
+          </div>
+        </div>
+        <div>
+          <h1 class="font-orbitron font-bold text-sm sm:text-base tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-pink-500">
+            CYBER AI LAB v3.0
+          </h1>
+          <p class="text-[10px] text-slate-400 font-mono tracking-tight">Simulasi Kuis Teknologi Interaktif</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Audio Synth Toggle -->
+        <button id="btn-audio-toggle" onclick="toggleAudioSynthesizer()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-400/50 text-xs font-mono text-slate-300 transition-all flex items-center gap-1.5">
+          <span id="audio-icon">🔊</span>
+          <span class="hidden sm:inline" id="audio-label">Sound ON</span>
+        </button>
+
+        <div class="text-[11px] font-mono font-bold px-3 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-400/40 text-cyan-300">
+          15 SOAL
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow flex items-center justify-center p-3 sm:p-6">
+    <div class="w-full max-w-2xl">
+
+      <!-- ================= SCREEN 1: WELCOME & REGISTRATION ================= -->
+      <div id="screen-welcome" class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden text-center">
+        <!-- Neon Ambient Accents -->
+        <div class="absolute -top-24 -right-24 w-56 h-56 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-56 h-56 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="inline-flex p-4 bg-slate-900/90 border border-cyan-400/30 rounded-2xl mb-4 text-4xl shadow-inner animate-cyber-float">
+          🤖
+        </div>
+
+        <h2 class="font-orbitron text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide">
+          CYBER TECH & AI QUIZ
+        </h2>
+        <p class="text-slate-400 text-xs sm:text-sm mb-6 max-w-md mx-auto leading-relaxed">
+          Uji wawasanmu seputar Artificial Intelligence, Cloud, Machine Learning, dan Teknologi Digital Masa Depan!
+        </p>
+
+        <!-- Player Nickname Input -->
+        <div class="max-w-sm mx-auto mb-5 text-left">
+          <label class="block text-xs font-mono text-cyan-400 mb-1.5 uppercase tracking-wider">
+            [1] NAMA / NICKNAME PEMAIN:
+          </label>
+          <input type="text" id="input-player-name" placeholder="Contoh: Alex_Cyber" maxlength="20"
+            class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 font-mono text-center text-sm transition-all shadow-inner">
+        </div>
+
+        <!-- Avatar Selection -->
+        <div class="max-w-sm mx-auto mb-8 text-left">
+          <label class="block text-xs font-mono text-pink-400 mb-2 uppercase tracking-wider text-center">
+            [2] PILIH AVATAR CYBER:
+          </label>
+          <div class="flex justify-center gap-2 sm:gap-3" id="avatar-selector">
+            <button onclick="selectAvatar('🤖')" class="avatar-btn p-3 text-2xl bg-slate-900 border-2 border-cyan-400 rounded-xl transition-all scale-105 shadow-lg shadow-cyan-500/20" data-avatar="🤖">🤖</button>
+            <button onclick="selectAvatar('👾')" class="avatar-btn p-3 text-2xl bg-slate-900 border border-slate-800 rounded-xl opacity-60 hover:opacity-100 transition-all" data-avatar="👾">👾</button>
+            <button onclick="selectAvatar('⚡')" class="avatar-btn p-3 text-2xl bg-slate-900 border border-slate-800 rounded-xl opacity-60 hover:opacity-100 transition-all" data-avatar="⚡">⚡</button>
+            <button onclick="selectAvatar('🚀')" class="avatar-btn p-3 text-2xl bg-slate-900 border border-slate-800 rounded-xl opacity-60 hover:opacity-100 transition-all" data-avatar="🚀">🚀</button>
+            <button onclick="selectAvatar('🌐')" class="avatar-btn p-3 text-2xl bg-slate-900 border border-slate-800 rounded-xl opacity-60 hover:opacity-100 transition-all" data-avatar="🌐">🌐</button>
+          </div>
+        </div>
+
+        <!-- Start Quiz Button -->
+        <button onclick="startQuizSession()" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-cyan-400 via-indigo-600 to-pink-500 hover:from-cyan-300 hover:to-pink-400 text-slate-950 font-orbitron font-bold rounded-2xl shadow-xl shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-sm tracking-wider uppercase">
+          MULAI KUIS TEKNOLOGI 🔥
+        </button>
+      </div>
+
+
+      <!-- ================= SCREEN 2: GAMEPLAY ================= -->
+      <div id="screen-gameplay" class="hidden glass-card rounded-3xl p-5 sm:p-8 shadow-2xl relative">
+        
+        <!-- Combo Streak Badge -->
+        <div id="streak-badge" class="hidden absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-pink-500 text-slate-950 font-mono font-black text-xs px-3 py-1 rounded-full shadow-lg shadow-amber-500/20 animate-bounce">
+          🔥 <span id="streak-counter">2</span>x STREAK BONUS!
+        </div>
+
+        <!-- Header Info Bar -->
+        <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-800">
+          <div class="flex items-center space-x-3">
+            <span id="display-player-avatar" class="text-2xl p-2 bg-slate-900 border border-slate-800 rounded-xl">🤖</span>
+            <div>
+              <div id="display-player-name" class="font-bold text-sm text-slate-200">CyberExplorer</div>
+              <div id="display-current-score" class="text-xs font-mono text-cyan-400 font-bold">SKOR: 0 PTS</div>
+            </div>
+          </div>
+
+          <!-- Circular Countdown Timer -->
+          <div class="relative w-12 h-12 flex items-center justify-center">
+            <svg class="w-12 h-12 transform -rotate-90">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" class="text-slate-800" fill="transparent" />
+              <circle id="timer-circle-progress" cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" class="text-cyan-400 transition-all duration-1000 ease-linear" fill="transparent" stroke-dasharray="125.6" stroke-dashoffset="0" />
+            </svg>
+            <span id="timer-text" class="absolute font-mono font-bold text-xs text-slate-100">15</span>
+          </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="mb-5">
+          <div class="flex justify-between items-center text-xs font-mono text-slate-400 mb-1.5">
+            <span id="label-question-number">SOAL 01 / 15</span>
+            <span id="label-progress-percentage" class="text-cyan-400">7%</span>
+          </div>
+          <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-cyan-400 to-pink-500 rounded-full transition-all duration-300" style="width: 6.66%;"></div>
+          </div>
+        </div>
+
+        <!-- Question Title -->
+        <div class="mb-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-inner min-h-[90px] flex items-center">
+          <h3 id="question-text" class="text-base sm:text-lg font-semibold text-slate-100 leading-relaxed">
+            Memuat Pertanyaan...
+          </h3>
+        </div>
+
+        <!-- Options Container -->
+        <div id="options-grid" class="space-y-2.5 mb-6">
+          <!-- Options injected dynamically -->
+        </div>
+
+        <!-- Next Question Button -->
+        <div class="flex justify-end pt-2">
+          <button id="btn-next-question" onclick="goToNextQuestion()" disabled class="w-full sm:w-auto px-8 py-3.5 bg-slate-800 text-slate-500 font-mono font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            SOAL SELANJUTNYA ➔
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ================= SCREEN 3: RESULT & REVIEW ================= -->
+      <div id="screen-result" class="hidden glass-card rounded-3xl p-6 sm:p-10 shadow-2xl text-center">
+        
+        <div class="inline-flex p-4 bg-slate-900 border border-pink-500/30 rounded-2xl mb-4 text-4xl shadow-inner">
+          🏆
+        </div>
+        
+        <h2 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white mb-1">
+          KUIS SELESAI!
+        </h2>
+        <p id="label-rank-title" class="text-xs sm:text-sm font-mono text-cyan-400 mb-6">[ HASIL SIMULASI DIGITAL ]</p>
+
+        <!-- Result Score Card -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 mb-6 max-w-sm mx-auto shadow-inner">
+          <div class="flex justify-center items-center gap-2 mb-2">
+            <span id="final-avatar" class="text-2xl">🤖</span>
+            <span id="final-name" class="font-bold text-slate-200">CyberExplorer</span>
+          </div>
+
+          <div class="text-[11px] text-slate-400 font-mono uppercase tracking-widest mb-1">TOTAL SKOR AKHIR</div>
+          <div id="final-score" class="font-orbitron text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-pink-500 mb-4">
+            0 PTS
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+              <span class="block text-slate-500 text-[10px] uppercase">Benar</span>
+              <span id="final-correct-ratio" class="font-bold text-emerald-400 text-sm">0 / 15</span>
+            </div>
+            <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+              <span class="block text-slate-500 text-[10px] uppercase">Akurasi</span>
+              <span id="final-accuracy" class="font-bold text-cyan-400 text-sm">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          <button onclick="shareScoreToWhatsApp()" class="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 text-sm font-mono">
+            <span>💬</span> BAGIKAN KE WHATSAPP
+          </button>
+          <button onclick="restartQuizGame()" class="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-2 text-sm font-mono">
+            <span>🔄</span> MAIN LAGI
+          </button>
+        </div>
+
+        <!-- Detailed Review List -->
+        <div class="text-left border-t border-slate-800 pt-5">
+          <h4 class="text-xs font-mono uppercase font-bold text-slate-400 mb-3 flex items-center gap-2 tracking-wider">
+            <span>📋</span> PEMBAHASAN LENGKAP KUNCI JAWABAN:
+          </h4>
+          <div id="review-cards-wrapper" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+            <!-- Review cards injected dynamically -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-900 bg-slate-950/80 py-3 text-center text-xs font-mono text-slate-600">
+    Cyber AI Quiz Lab • Siap Di-deploy di GitHub Pages & Dijelajahi
+  </footer>
+
+  <script>
+    // ================= WEB AUDIO SYNTHESIZER =================
+    class CyberSoundEngine {
+      constructor() {
+        this.audioCtx = null;
+        this.isMuted = false;
+      }
+
+      init() {
+        if (!this.audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.audioCtx = new AudioContextClass();
+          }
+        }
+      }
+
+      playCorrect() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.audioCtx) return;
+
+        const now = this.audioCtx.currentTime;
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08); // E5
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.16); // G5
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+
+      playWrong() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.audioCtx) return;
+
+        const now = this.audioCtx.currentTime;
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.25);
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+
+      playTick() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.audioCtx) return;
+
+        const now = this.audioCtx.currentTime;
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+
+        gain.gain.setValueAtTime(0.02, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.03);
+      }
+
+      playFanfare() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.audioCtx) return;
+
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const now = this.audioCtx.currentTime + (idx * 0.09);
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+          osc.connect(gain);
+          gain.connect(this.audioCtx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.25);
+        });
+      }
+    }
+
+    const soundSynth = new CyberSoundEngine();
+
+    function toggleAudioSynthesizer() {
+      soundSynth.isMuted = !soundSynth.isMuted;
+      document.getElementById('audio-icon').textContent = soundSynth.isMuted ? '🔇' : '🔊';
+      document.getElementById('audio-label').textContent = soundSynth.isMuted ? 'Muted' : 'Sound ON';
+    }
+
+    // Exactly 15 questions provided by user
+    const quizDataset = [
+      {
+        question: "Apa kepanjangan dari AI?",
+        options: ["Automatic Internet", "Artificial Intelligence", "Advanced Information", "Application Intelligence"],
+        correctIndex: 1
+      },
+      {
+        question: "Apa fungsi utama kecerdasan buatan (AI)?",
+        options: ["Menghapus semua data", "Membantu komputer melakukan tugas yang membutuhkan kecerdasan manusia", "Mematikan komputer secara otomatis", "Mengganti jaringan internet"],
+        correctIndex: 1
+      },
+      {
+        question: "Contoh penggunaan AI dalam kehidupan sehari-hari adalah...",
+        options: ["Lampu minyak", "Asisten suara pada smartphone", "Buku tulis", "Pensil"],
+        correctIndex: 1
+      },
+      {
+        question: "Teknologi yang digunakan untuk menyimpan data secara online disebut...",
+        options: ["Cloud computing", "Keyboard", "Printer", "Scanner"],
+        correctIndex: 0
+      },
+      
