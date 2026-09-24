@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Teknologi & AI</title>
+
+<style>
+*{box-sizing:border-box;font-family:Arial,sans-serif}
+
+body{
+ margin:0;min-height:100vh;display:flex;justify-content:center;
+ align-items:center;background:linear-gradient(135deg,#4facfe,#7367f0);
+}
+
+.game{
+ width:95%;max-width:650px;background:white;padding:25px;
+ border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+h1{text-align:center;color:#4b4ded}
+
+.info{
+ display:flex;justify-content:space-between;gap:8px;
+ flex-wrap:wrap;margin-bottom:15px;font-weight:bold;
+}
+
+.timer{
+ text-align:center;font-size:24px;font-weight:bold;
+ margin:10px 0;color:#e53935;
+}
+
+.level{
+ text-align:center;font-weight:bold;margin-bottom:10px;
+}
+
+.question{
+ font-size:20px;font-weight:bold;margin:20px 0;
+}
+
+.option{
+ width:100%;padding:14px;margin:7px 0;border:2px solid #ddd;
+ border-radius:12px;background:white;cursor:pointer;
+ text-align:left;font-size:16px;
+}
+
+.option:hover{background:#f0f0ff}
+
+.correct{
+ background:#b9f6ca!important;
+ border-color:#22a447!important;
+}
+
+.wrong{
+ background:#ffcdd2!important;
+ border-color:#e53935!important;
+}
+
+button{
+ border:none;border-radius:12px;padding:13px 20px;
+ cursor:pointer;font-size:16px;font-weight:bold;
+}
+
+#nextBtn,#restart{
+ width:100%;margin-top:15px;background:#4b4ded;color:white;
+}
+
+#result{text-align:center;display:none}
+
+.leaderboard{
+ margin-top:20px;padding:15px;border-radius:15px;
+ background:#f4f4ff;
+}
+
+.leaderboard h2{text-align:center}
+
+table{
+ width:100%;border-collapse:collapse;
+}
+
+th,td{
+ padding:8px;border-bottom:1px solid #ddd;
+ text-align:center;
+}
+
+.nameInput{
+ width:100%;padding:12px;border:2px solid #ddd;
+ border-radius:10px;margin-top:10px;font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+<div id="quizBox">
+
+<h1>🤖 Kuis Teknologi & AI</h1>
+
+<div class="level" id="level">LEVEL 1</div>
+
+<div class="info">
+<span id="number">Soal 1/15</span>
+<span id="lives">❤️❤️❤️</span>
+<span id="score">Skor: 0</span>
+</div>
+
+<div class="timer">
+⏱️ <span id="time">30</span>
+</div>
+
+<div id="question" class="question"></div>
+
+<div id="options"></div>
+
+<button id="nextBtn" onclick="nextQuestion()" style="display:none">
+Soal Berikutnya ➡️
+</button>
+
+</div>
+
+
+<div id="result">
+
+<h1>🏆 GAME SELESAI!</h1>
+
+<h2 id="finalScore"></h2>
+
+<p id="message"></p>
+
+<input
+ id="playerName"
+ class="nameInput"
+ placeholder="Masukkan nama kamu"
+ maxlength="15">
+
+<button id="restart" onclick="saveScore()">
+💾 Simpan ke Leaderboard
+</button>
+
+<div class="leaderboard">
+
+<h2>🏆 LEADERBOARD</h2>
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Nama</th>
+<th>Skor</th>
+</tr>
+</thead>
+
+<tbody id="leaderboardBody"></tbody>
+
+</table>
+
+</div>
+
+<button id="restart" onclick="restartGame()">
+🔄 Main Lagi
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const questions=[
+
+{
+q:"Apa kepanjangan dari AI?",
+options:[
+"Automatic Internet",
+"Artificial Intelligence",
+"Advanced Information",
+"Applied Internet"
+],
+answer:"Artificial Intelligence"
+},
+
+{
+q:"Teknologi AI digunakan untuk membuat komputer dapat...",
+options:[
+"Berpikir dan belajar dari data",
+"Selalu bekerja tanpa listrik",
+"Menggantikan semua manusia",
+"Berjalan tanpa program"
+],
+answer:"Berpikir dan belajar dari data"
+},
+
+{
+q:"Contoh penggunaan AI dalam kehidupan sehari-hari adalah...",
+options:[
+"Buku tulis",
+"Pensil",
+"Rekomendasi video",
+"Penggaris"
+],
+answer:"Rekomendasi video"
+},
+
+{
+q:"Alat yang digunakan untuk memasukkan teks ke komputer adalah...",
+options:[
+"Monitor",
+"Keyboard",
+"Speaker",
+"Printer"
+],
+answer:"Keyboard"
+},
+
+{
+q:"Internet digunakan untuk...",
+options:[
+"Menghubungkan dan bertukar informasi",
+"Menghapus semua data",
+"Membuat komputer tidak menyala",
+"Menggantikan baterai"
+],
+answer:"Menghubungkan dan bertukar informasi"
+},
+
+{
+q:"Chatbot adalah program yang dapat...",
+options:[
+"Mencetak kertas",
+"Mengisi baterai",
+"Berkomunikasi dengan pengguna",
+"Memperbaiki layar"
+],
+answer:"Berkomunikasi dengan pengguna"
+},
+
+{
+q:"Data yang digunakan AI untuk belajar disebut...",
+options:[
+"Kabel",
+"Data pelatihan",
+"Layar",
+"Perangkat keras"
+],
+answer:"Data pelatihan"
+},
+
+{
+q:"Contoh perangkat keras komputer adalah...",
+options:[
+"Microsoft Word",
+"Google",
+"Keyboard",
+"Sistem operasi"
+],
+answer:"Keyboard"
+},
+
+{
+q:"Salah satu manfaat AI di bidang pendidikan adalah...",
+options:[
+"Membantu proses belajar",
+"Menghilangkan sekolah",
+"Membuat siswa tidak perlu belajar",
+"Menghapus buku pelajaran"
+],
+answer:"Membantu proses belajar"
+},
+
+{
+q:"Aplikasi untuk mencari informasi di internet disebut...",
+options:[
+"Search engine",
+"Calculator",
+"Paint",
+"File manager"
+],
+answer:"Search engine"
+},
+
+{
+q:"Password yang baik seharusnya...",
+options:[
+"Mudah ditebak",
+"Menggunakan nama sendiri saja",
+"Kuat dan sulit ditebak",
+"Sama untuk semua akun"
+],
+answer:"Kuat dan sulit ditebak"
+},
+
+{
+q:"Robot yang melakukan tugas berdasarkan program merupakan contoh penerapan...",
+options:[
+"Teknologi",
+"Buku digital",
+"Kertas",
+"Alat tulis"
+],
+answer:"Teknologi"
+},
+
+{
+q:"Salah satu risiko menggunakan AI adalah...",
+options:[
+"Informasi yang diberikan bisa saja tidak akurat",
+"Komputer menjadi lebih kecil",
+"Internet selalu gratis",
+"Semua informasi pasti benar"
+],
+answer:"Informasi yang diberikan bisa saja tidak akurat"
+},
+
+{
+q:"Orang yang membuat program komputer disebut...",
+options:[
+"Atlet",
+"Programmer",
+"Pelukis",
+"Dokter"
+],
+answer:"Programmer"
+},
+
+{
+q:"Saat menggunakan AI, kita sebaiknya...",
+options:[
+"Mempercayai semua jawaban tanpa memeriksa",
+"Menyebarkan semua informasi pribadi",
+"Memeriksa kembali informasi yang diberikan",
+"Menggunakan AI untuk menipu orang lain"
+],
+answer:"Memeriksa kembali informasi yang diberikan"
+}
+];
+
+
+let current=0;
+let score=0;
+let lives=3;
+let time=30;
+let timer;
+let answered=false;
+
+
+/* SUARA */
+
+function playSound(type){
+
+const audioCtx =
+new (window.AudioContext || window.webkitAudioContext)();
+
+const oscillator=audioCtx.createOscillator();
+const gain=audioCtx.createGain();
+
+oscillator.connect(gain);
+gain.connect(audioCtx.destination);
+
+if(type==="correct"){
+ oscillator.frequency.value=700;
+}else{
+ oscillator.frequency.value=180;
+}
+
+gain.gain.value=.15;
+
+oscillator.start();
+
+setTimeout(()=>{
+ oscillator.stop();
+},200);
+
+}
+
+
+/* TAMPILKAN SOAL */
+
+function showQuestion(){
+
+clearInterval(timer);
+
+answered=false;
+time=30;
+
+document.getElementById("time").textContent=time;
+
+document.getElementById("number").textContent=
+`Soal ${current+1}/${questions.length}`;
+
+document.getElementById("score").textContent=
+`Skor: ${score}`;
+
+document.getElementById("lives").textContent=
+"❤️".repeat(lives)+"🖤".repeat(3-lives);
+
+
+/* LEVEL */
+
+let level=Math.floor(current/5)+1;
+
+document.getElementById("level").textContent=
+`LEVEL ${level}`;
+
+
+/* SOAL */
+
+document.getElementById("question").textContent=
+questions[current].q;
+
+const optionsBox=document.getElementById("options");
+
+optionsBox.innerHTML="";
+
+
+let shuffled=[...questions[current].options]
+.sort(()=>Math.random()-.5);
+
+
+shuffled.forEach(option=>{
+
+const button=document.createElement("button");
+
+button.className="option";
+
+button.textContent=option;
+
+button.onclick=()=>{
+checkAnswer(button,option);
+};
+
+optionsBox.appendChild(button);
+
+});
+
+
+document.getElementById("nextBtn").style.display="none";
+
+
+/* TIMER */
+
+timer=setInterval(()=>{
+
+time--;
+
+document.getElementById("time").textContent=time;
+
+if(time<=0){
+
+clearInterval(timer);
+
+if(!answered){
+
+answered=true;
+
+lives--;
+
+document.getElementById("lives").textContent=
+"❤️".repeat(lives)+"🖤".repeat(3-lives);
+
+playSound("wrong");
+
+disableOptions();
+
+document.getElementById("nextBtn").style.display="block";
+
+if(lives<=0){
+
+setTimeout(showResult,700);
+
+}
+
+}
+
+}
+
+},1000);
+
+}
+
+
+/* JAWABAN */
+
+function checkAnswer(button,selected){
+
+if(answered)return;
+
+answered=true;
+
+clearInterval(timer);
+
+const correct=questions[current].answer;
+
+disableOptions();
+
+if(selected===correct){
+
+button.classList.add("correct");
+
+score+=10;
+
+playSound("correct");
+
+}else{
+
+button.classList.add("wrong");
+
+lives--;
+
+playSound("wrong");
+
+const buttons=document.querySelectorAll(".option");
+
+buttons.forEach(btn=>{
+ if(btn.textContent===correct){
+  btn.classList.add("correct");
+ }
+});
+
+}
+
+document.getElementById("score").textContent=
+`Skor: ${score}`;
+
+document.getElementById("lives").textContent=
+"❤️".repeat(lives)+"🖤".repeat(3-lives);
+
+document.getElementById("nextBtn").style.display="block";
+
+if(lives<=0){
+
+setTimeout(showResult,700);
+
+}
+
+}
+
+
+/* MATIKAN PILIHAN */
+
+function disableOptions(){
+
+document.querySelectorAll(".option").forEach(btn=>{
+ btn.disabled=true;
+});
+
+}
+
+
+/* SOAL BERIKUTNYA */
+
+function nextQuestion(){
+
+if(lives<=0){
+
+showResult();
+
+return;
+
+}
+
+current++;
+
+if(current<questions.length){
+
+showQuestion();
+
+}else{
+
+showResult();
+
+}
+
+}
+
+
+/* HASIL */
+
+function showResult(){
+
+clearInterval(timer);
+
+document.getElementById("quizBox").style.display="none";
+
+document.getElementById("result").style.display="block";
+
+document.getElementById("finalScore").textContent=
+`Skor kamu: ${score} / 150`;
+
+let message;
+
+if(score===150){
+
+message="🎉 Sempurna! Semua jawaban benar!";
+
+}else if(score>=100){
+
+message="👏 Hebat! Pengetahuan teknologimu bagus!";
+
+}else if(score>=70){
+
+message="👍 Bagus! Terus belajar lagi!";
+
+}else{
+
+message="💪 Tetap semangat! Coba lagi untuk mendapatkan skor lebih tinggi!";
+
+}
+
+document.getElementById("message").textContent=message;
+
+loadLeaderboard();
+
+}
+
+
+/* LEADERBOARD */
+
+function saveScore(){
+
+const name=
+document.getElementById("playerName").value.trim() || "Pemain";
+
+let leaderboard=
+JSON.parse(localStorage.getItem("aiLeaderboard")) || [];
+
+leaderboard.push({
+name:name,
+score:score
+});
+
+leaderboard.sort((a,b)=>b.score-a.score);
+
+leaderboard=leaderboard.slice(0,10);
+
+localStorage.setItem(
+"aiLeaderboard",
+JSON.stringify(leaderboard)
+);
+
+loadLeaderboard();
+
+alert("Skor berhasil disimpan! 🏆");
+
+}
+
+
+/* TAMPIL LEADERBOARD */
+
+function loadLeaderboard(){
+
+let leaderboard=
+JSON.parse(localStorage.getItem("aiLeaderboard")) || [];
+
+const body=
+document.getElementById("leaderboardBody");
+
+body.innerHTML="";
+
+leaderboard.forEach((player,index)=>{
+
+const row=document.createElement("tr");
+
+row.innerHTML=`
+<td>${index+1}</td>
+<td>${player.name}</td>
+<td>${player.score}</td>
+`;
+
+body.appendChild(row);
+
+});
+
+}
+
+
+/* MAIN LAGI */
+
+function restartGame(){
+
+current=0;
+score=0;
+lives=3;
+time=30;
+
+document.getElementById("quizBox").style.display="block";
+
+document.getElementById("result").style.display="none";
+
+document.getElementById("playerName").value="";
+
+showQuestion();
+
+}
+
+
+showQuestion();
+
+</script>
+
+</body>
+</html>
